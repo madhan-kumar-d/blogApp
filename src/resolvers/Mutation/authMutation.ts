@@ -2,7 +2,12 @@ import { Context } from "../../index"
 import validator from "validator";
 import bcrypt from "bcrypt"
 import Jwt from "jsonwebtoken";
+import { Users } from "@prisma/client";
 
+interface signinArgs {
+    email: string
+    password: string
+}
 interface signupArgs {
     name: string
     email: string
@@ -61,6 +66,7 @@ export const authMutation = {
                     password: hashedPassword, 
                 }
             })
+            const userID = BigInt(user.id).toString();
             await prisma.profile.create({
                 data: {
                     bio,
@@ -72,7 +78,7 @@ export const authMutation = {
                 userErrors: [],
                 token: Jwt.sign(
                     {
-                        userID: user.id,
+                        userID,
                     },
                     jwtSalt as string,
                     {
@@ -89,5 +95,61 @@ export const authMutation = {
             }
         }
         
+    },
+    signin: async (_:any, args: signinArgs, { prisma }: Context): Promise<signupPayload> => {
+        
+        const { email, password } = args;
+        if (!email || !password) {
+            return {
+                userErrors: [{
+                    message: "Need to Provide Email and Password to sign in"
+                }],
+                token: null
+            }
+        }
+        const user = await prisma.users.findUnique({
+            where: {
+                email
+            },
+            select: {
+                email: true,
+                password: true,
+                id: true
+            }
+        });
+        if (!user) {
+            return {
+                userErrors: [{
+                    message: "Invalid Credentials"
+                }],
+                token: null
+            }
+        }
+        const passwordMatched = await bcrypt.compare(password, user.password);
+        
+        if (!passwordMatched) {
+            return {
+                userErrors: [{
+                    message: "Invalid Credentials2"
+                }],
+                token: null
+            }
+        }
+        const userID = BigInt(user.id).toString;
+        const jwtSalt = process.env.jwtSalt;
+        return {
+            userErrors: [{
+                message: ""
+            }],
+            token: Jwt.sign(
+                {
+                    userID,
+                },
+                jwtSalt as string,
+                {
+                    expiresIn: (60*60*24*2) // 2 days sec*min*hrs*days
+                }
+            )
+        }
     }
 }

@@ -9,7 +9,9 @@ export const typeDefs = `#graphql
         postCreate(post: PostInput!): postPayload
         postUpdate(postID: ID!,post: PostInput!): postPayload
         postDelete(postID: ID!): postPayload
-        signup(email: String, name:String!, password: String!, bio: String!): signupPayLoad!
+        signup(email: String!, name:String!, password: String!, bio: String!): signupPayLoad!
+        signin(email:String!, password:String!):signupPayLoad!
+        verifyToken(token:String): verifyTokenPayLoad!
     }
     type Post{
         id: ID!
@@ -41,6 +43,10 @@ export const typeDefs = `#graphql
     type signupPayLoad {
         userErrors: [userErrors!]!,
         token: String,
+    }
+    type verifyTokenPayLoad{
+        status: Boolean!
+        message: String!
     }
     input PostInput {
         title: String
