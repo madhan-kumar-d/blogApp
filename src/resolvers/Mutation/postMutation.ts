@@ -1,4 +1,4 @@
-import { Context } from "../index"
+import { Context } from "../../index"
 import { Prisma, Posts } from "@prisma/client"
 
 interface PostArgs {
@@ -15,9 +15,11 @@ interface PostResponse {
     post: Prisma.Prisma__PostsClient<Posts, never>| null 
 }
 
-export const Mutation = {
+export const postMutation = {
     postCreate: async(_: any, { post }:PostArgs, { prisma }: Context): Promise<PostResponse> => {
         const { title, desc } = post;
+        console.log(title);
+        
         if (!title) {
             return {
                 userErrors: [{
