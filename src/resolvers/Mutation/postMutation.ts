@@ -16,10 +16,16 @@ interface PostResponse {
 }
 
 export const postMutation = {
-    postCreate: async(_: any, { post }:PostArgs, { prisma }: Context): Promise<PostResponse> => {
+    postCreate: async(_: any, { post }:PostArgs, { prisma, userInfo }: Context): Promise<PostResponse> => {
+        if (!userInfo) {
+            return {
+                userErrors: [{
+                    message: "Unauthenticated Access"
+                }],
+                post: null
+            }
+        }
         const { title, desc } = post;
-        console.log(title);
-        
         if (!title) {
             return {
                 userErrors: [{
@@ -35,7 +41,7 @@ export const postMutation = {
                     data: {
                         title,
                         desc,
-                        user_id: 1
+                        user_id: userInfo.userID
                     }
                 })
             }
@@ -49,7 +55,15 @@ export const postMutation = {
             }
         }
     },
-    postUpdate: async (_:any, { postID, post }: {postID:string, post: PostArgs['post']}, {prisma}: Context): Promise<PostResponse> => {
+    postUpdate: async (_: any, { postID, post }: { postID: string, post: PostArgs['post'] }, { prisma, userInfo }: Context): Promise<PostResponse> => {
+        if (!userInfo) {
+            return {
+                userErrors: [{
+                    message: "Unauthenticated Access"
+                }],
+                post: null
+            }
+        }
         const { title, desc } = post;
         const postExist = await prisma.posts.findUnique({
             where: {
@@ -60,6 +74,14 @@ export const postMutation = {
             return {
                 userErrors: [{
                     message: "Post Doesn't exist"
+                }],
+                post: null
+            };
+        }
+        if (BigInt(postExist.id).toString() !== userInfo.userID.toString()) {
+            return {
+                userErrors: [{
+                    message: "You are not owner for this Post"
                 }],
                 post: null
             };
@@ -82,17 +104,32 @@ export const postMutation = {
             })
         }
     },
-    postDelete: async (_: any, { postID }: { postID: string }, { prisma }: Context) => {
+    postDelete: async (_: any, { postID }: { postID: string }, { prisma, userInfo }: Context) => {
+        if (!userInfo) {
+            return {
+                userErrors: [{
+                    message: "Unauthenticated Access"
+                }],
+                post: null
+            }
+        }
         const postExist = await prisma.posts.findUnique({
             where: {
                 id: Number(postID),
             }
         })
-        console.log(postExist);
         if (!postExist) {
             return {
                 userErrors: [{
                     message: "Post Doesn't exist"
+                }],
+                post: null
+            };
+        }
+        if (BigInt(postExist.id).toString() !== userInfo.userID.toString()) {
+            return {
+                userErrors: [{
+                    message: "You are not owner for this Post"
                 }],
                 post: null
             };

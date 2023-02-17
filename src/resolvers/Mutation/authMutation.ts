@@ -2,7 +2,6 @@ import { Context } from "../../index"
 import validator from "validator";
 import bcrypt from "bcrypt"
 import Jwt from "jsonwebtoken";
-import { Users } from "@prisma/client";
 
 interface signinArgs {
     email: string
@@ -25,6 +24,7 @@ export const authMutation = {
         const { name, email, password, bio } = args;
         const errors = [];
         const jwtSalt = process.env.jwtSalt;
+        
         if (validator.isEmpty(name)) {
             errors.push({
                 message: "Please provide name",
@@ -97,7 +97,7 @@ export const authMutation = {
         
     },
     signin: async (_:any, args: signinArgs, { prisma }: Context): Promise<signupPayload> => {
-        
+
         const { email, password } = args;
         if (!email || !password) {
             return {
@@ -135,8 +135,9 @@ export const authMutation = {
                 token: null
             }
         }
-        const userID = BigInt(user.id).toString;
+        const userID = BigInt(user.id).toString();
         const jwtSalt = process.env.jwtSalt;
+        
         return {
             userErrors: [{
                 message: ""

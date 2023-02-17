@@ -3,7 +3,7 @@
 export const typeDefs = `#graphql
     type Query{
         hello: String
-        posts: [Post!]
+        posts: postGetPayload
     }
     type Mutation {
         postCreate(post: PostInput!): postPayload
@@ -39,6 +39,10 @@ export const typeDefs = `#graphql
     type postPayload{
         userErrors: [userErrors!]!
         post: Post
+    }
+    type postGetPayload{
+        userErrors: [userErrors!]!
+        post: [Post!]
     }
     type signupPayLoad {
         userErrors: [userErrors!]!,
