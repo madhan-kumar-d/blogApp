@@ -1,17 +1,35 @@
 import { Context } from "../index"
 export const Query = {
-    hello: () => {
-        return 213;
+    me: (_:any, __:any, {prisma, userInfo}: Context) => {
+        if (!userInfo) {
+            return null;
+        }
+        return prisma.users.findUnique({
+            where: {
+                id: Number(userInfo.userID)
+            }
+        })
+    },
+    OtherProfile: (_: any, { UserID }: { UserID: string }, { prisma, userInfo }: Context)=>{
+        
+        if (!userInfo) {
+            return null;
+        }
+        return prisma.profile.findUnique({
+            where: {
+                user_id: Number(UserID)
+            }
+        })
     },
     posts: async (parents: any, args: any, { prisma, userInfo }: Context) => {
-        if (userInfo == null) {
-            return {
-                userErrors: [{
-                    message: "Unauthenticated Access"
-                }],
-                post: null
-            }
-        }
+        // if (userInfo == null) {
+        //     return {
+        //         userErrors: [{
+        //             message: "Unauthenticated Access"
+        //         }],
+        //         post: null
+        //     }
+        // }
         const posts = await prisma.posts.findMany({
             orderBy: [
                 {
@@ -22,12 +40,7 @@ export const Query = {
         
         return {
             userErrors: [],
-            post: () => {
-                return posts.map((val, key) => {
-                    const ids = BigInt(val.id).toString();
-                    return { ...val, id: ids }
-                })
-            }
+            post: posts
         }
     }
 }

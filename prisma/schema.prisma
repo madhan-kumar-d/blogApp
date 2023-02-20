@@ -11,10 +11,10 @@ datasource db {
 }
 
 model Users {
-  id         BigInt   @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   name       String
   email      String   @unique
-  password  String 
+  password   String
   createAt   DateTime @default(now())
   modifiedAt DateTime @updatedAt
   Posts      Posts[]
@@ -22,21 +22,21 @@ model Users {
 }
 
 model Posts {
-  id          BigInt   @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String   @unique
   desc        String?
   isPublished Boolean  @default(false)
   createAt    DateTime @default(now())
   modifiedAt  DateTime @updatedAt
-  user_id     BigInt
+  user_id     Int
   users       Users    @relation(fields: [user_id], references: [id])
 }
 
 model Profile {
-  id         BigInt   @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   bio        String
   createAt   DateTime @default(now())
   modifiedAt DateTime @updatedAt
-  user_id    BigInt   @unique
+  user_id    Int      @unique
   users      Users    @relation(fields: [user_id], references: [id])
 }

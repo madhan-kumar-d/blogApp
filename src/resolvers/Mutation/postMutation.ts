@@ -41,7 +41,7 @@ export const postMutation = {
                     data: {
                         title,
                         desc,
-                        user_id: userInfo.userID
+                        user_id: Number(userInfo.userID)
                     }
                 })
             }
@@ -78,7 +78,7 @@ export const postMutation = {
                 post: null
             };
         }
-        if (BigInt(postExist.id).toString() !== userInfo.userID.toString()) {
+        if (postExist.user_id !== userInfo.userID) {
             return {
                 userErrors: [{
                     message: "You are not owner for this Post"
@@ -126,7 +126,7 @@ export const postMutation = {
                 post: null
             };
         }
-        if (BigInt(postExist.id).toString() !== userInfo.userID.toString()) {
+        if (postExist.user_id !== userInfo.userID) {
             return {
                 userErrors: [{
                     message: "You are not owner for this Post"
@@ -143,5 +143,105 @@ export const postMutation = {
             userErrors: [],
             post: postExist
         };
-    }
+    },
+    postPublish: async (_:any, {postID}: {postID:string}, {prisma, userInfo}: Context) => {
+        if (!userInfo) {
+            return {
+                userErrors: [{
+                    message: "Unauthenticated Access"
+                }],
+                post: null
+            }
+        }
+        const postExist = await prisma.posts.findUnique({
+            where: {
+                id: Number(postID),
+            }
+        })
+        if (!postExist || !postID) {
+            return {
+                userErrors: [{
+                    message: "Post Doesn't exist"
+                }],
+                post: null
+            };
+        }
+        if (postExist.user_id !== userInfo.userID) {
+            return {
+                userErrors: [{
+                    message: "You are not owner for this Post"
+                }],
+                post: null
+            };
+        }
+        const resp = await prisma.posts.update({
+            data: {
+                isPublished: true,
+            },
+            where: {
+                id: Number(postID),
+            }
+        })
+        console.log(resp);
+        return {
+            userErrors: [{
+                message: ""
+            }],
+            post: prisma.posts.findUnique({
+                where: {
+                    id: Number(postID),
+                }
+            })
+        };
+    },
+    postUnpublish: async (_:any, {postID}: {postID:string}, {prisma, userInfo}: Context) => {
+        if (!userInfo) {
+            return {
+                userErrors: [{
+                    message: "Unauthenticated Access"
+                }],
+                post: null
+            }
+        }
+        const postExist = await prisma.posts.findUnique({
+            where: {
+                id: Number(postID),
+            }
+        })
+        if (!postExist || !postID) {
+            return {
+                userErrors: [{
+                    message: "Post Doesn't exist"
+                }],
+                post: null
+            };
+        }
+        if (postExist.user_id !== userInfo.userID) {
+            return {
+                userErrors: [{
+                    message: "You are not owner for this Post"
+                }],
+                post: null
+            };
+        }
+        const resp = await prisma.posts.update({
+            data: {
+                isPublished: false,
+            },
+            where: {
+                id: Number(postID),
+            }
+        })
+        console.log(resp);
+        return {
+            userErrors: [{
+                message: ""
+            }],
+            post: prisma.posts.findUnique({
+                where: {
+                    id: Number(postID),
+                }
+            })
+        };
+    },
 }

@@ -66,7 +66,7 @@ export const authMutation = {
                     password: hashedPassword, 
                 }
             })
-            const userID = BigInt(user.id).toString();
+            const userID = Number(user.id);
             await prisma.profile.create({
                 data: {
                     bio,
@@ -135,7 +135,7 @@ export const authMutation = {
                 token: null
             }
         }
-        const userID = BigInt(user.id).toString();
+        const userID = Number(user.id);
         const jwtSalt = process.env.jwtSalt;
         
         return {
