@@ -10,16 +10,22 @@ export const Query = {
             }
         })
     },
-    OtherProfile: (_: any, { UserID }: { UserID: string }, { prisma, userInfo }: Context)=>{
+    profile: async (_: any, { UserID }: { UserID: string }, { prisma, userInfo }: Context)=>{
         
         if (!userInfo) {
             return null;
         }
-        return prisma.profile.findUnique({
+        const isMyProfile = (userInfo.userID === Number(UserID)) ? true : false;
+        const ProfileData = await prisma.profile.findUnique({
             where: {
                 user_id: Number(UserID)
             }
         })
+
+        return {
+            isMyProfile,
+            ...ProfileData
+        }
     },
     posts: async (parents: any, args: any, { prisma, userInfo }: Context) => {
         // if (userInfo == null) {
@@ -37,10 +43,10 @@ export const Query = {
                 }
             ]
         })
-        
-        return {
-            userErrors: [],
-            post: posts
-        }
+        return posts;
+        // return {
+        //     userErrors: [],
+        //     post: posts
+        // }
     }
 }

@@ -2,9 +2,9 @@
 // export const typeDefs =  gql`
 export const typeDefs = `#graphql
     type Query{
-        posts: postGetPayload
+        posts: [Post!]
         me: Users!
-        OtherProfile(UserID: ID!): Profile
+        profile(UserID: ID!): Profile
     }
     type Mutation {
         postCreate(post: PostInput!): postPayload
@@ -36,6 +36,7 @@ export const typeDefs = `#graphql
         id: ID!
         bio: String!
         createAt: String!
+        isMyProfile: Boolean!
         users: Users!
     }
     type userErrors{
